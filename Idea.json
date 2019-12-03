@@ -1,0 +1,30 @@
+Conditions (AND-standard):
+"parameter1": {
+	"sub-parameter1<": 10, (up to 10)
+	"sub-parameter2>": 10, (10 and up)
+	"sub-parameter3=": 5, (exactly 5)
+	"OR": {
+		"sub-parameter4>": 5,
+		"AND": {
+			"sub-parameter2>": 20,
+			"sub-parameter1>": 8
+		}
+	}
+},
+"tiles": {
+	"[xo1,yo1]=": "forest" (indexing in sub-context)
+},
+"tiles[xo2,yo2]=": "river",
+"parameter2>": ["ADD", "parameter1.sub-parameter1", 5]
+
+
+
+Calculations:
+"calced1": ["ADD", "parameter1.sub-parameter1", "parameter1.sub-parameter4"]
+"calced2": ["MAX", "parameter1.sub-parameter2", ["ADD", "parameter1.sub-parameter1", "parameter1.sub-parameter4", 3]]
+
+Operations: ADD, SUB, MULT, DIV, MIN, MAX, POW, LOG, SQRT, ROOT 
+
+calculation = operation | conditional
+conditional = condition + calculation
+condition = and | or | not
