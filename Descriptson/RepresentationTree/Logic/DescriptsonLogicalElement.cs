@@ -40,8 +40,6 @@ namespace Descriptson.RepresentationTree.Logic
 
     public abstract class DescriptsonLogicalElement<TTarget> : DescriptsonLogicalElement, IDescriptsonTest<TTarget>
     {
-        private static readonly HashSet<string> propertyNames = new HashSet<string>(typeof(TTarget).GetProperties().Select(p => p.Name), StringComparer.OrdinalIgnoreCase);
-
         public ReadOnlyCollection<IDescriptsonTest<TTarget>> SubExpressions { get; }
 
         protected DescriptsonLogicalElement(IEnumerable<IDescriptsonTest<TTarget>> subExpressions)
