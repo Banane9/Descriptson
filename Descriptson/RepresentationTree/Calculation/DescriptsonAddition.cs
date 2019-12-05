@@ -24,18 +24,12 @@ namespace Descriptson.RepresentationTree.Calculation
         {
             var results = Parameters.Select(parameter => parameter.Calculate(target));
 
-            switch (typeof(TResult).Name)
-            {
-                case "Int32":
-                    return (TResult)(object)results.Cast<int>().Sum();
+            if (typeof(TResult) == typeof(string))
+                return (TResult)(object)string.Join("", results.Cast<string>());
 
-                case "String":
-                    return (TResult)(object)string.Join("", results.Cast<string>());
-
-                    // TODO: MOAR
-            }
-
-            return default(TResult);
+            return (TResult)typeof(Enumerable)
+                .GetMethod("Sum", new[] { typeof(IEnumerable<TResult>) })
+                .Invoke(null, new[] { results });
         }
     }
 }

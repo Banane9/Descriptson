@@ -12,7 +12,7 @@ namespace Descriptson.RepresentationTree.Calculation
         {
             { "add", typeof(DescriptsonAddition<,>) },
             { "if", typeof(DescriptsonConditional<,>) },
-            { "read", typeof(DescriptsonPropertyAccess<,>) },
+            { "get", typeof(DescriptsonPropertyAccess<,>) },
         };
 
         public static bool IsKnownOperator(string name)
