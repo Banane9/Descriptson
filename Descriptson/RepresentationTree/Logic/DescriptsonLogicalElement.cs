@@ -2,7 +2,7 @@
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.Linq;
-using System.Reflection;
+using Descriptson.RepresentationTree.Test;
 using Newtonsoft.Json.Linq;
 
 namespace Descriptson.RepresentationTree.Logic
@@ -25,16 +25,27 @@ namespace Descriptson.RepresentationTree.Logic
             return LogicalOperators.ContainsKey(name);
         }
 
-        public static object Make(string name, Type type, JObject jObject)
+        public static object Make(Type targetType, JProperty jProperty)
         {
-            if (string.IsNullOrWhiteSpace(name))
-                throw new ArgumentException("Must contain a name!", nameof(name));
+            if (string.IsNullOrWhiteSpace(jProperty.Name))
+                throw new ArgumentException("Must contain a name!", nameof(jProperty.Name));
 
-            if (!LogicalOperators.ContainsKey(name))
-                throw new InvalidOperationException($"No operator found with name [{name}]!");
+            if (jProperty.Value.Type != JTokenType.Object)
+                throw new InvalidOperationException("Operator needs an object!");
 
-            return LogicalOperators[name].MakeGenericType(type)
-                .InvokeMember("CreateFrom", BindingFlags.Public | BindingFlags.Static, null, null, new[] { jObject });
+            if (!LogicalOperators.ContainsKey(jProperty.Name))
+            {
+                //throw new InvalidOperationException($"No operator found with name [{jProperty.Name}]!");
+                if (!DescriptsonPropertyTest.EndsWithTestIndicator(jProperty.Name))
+                    throw new InvalidOperationException("Assignments are not allowed in a test context!");
+
+                return DescriptsonPropertyTest.Make(targetType, jProperty);
+            }
+
+            return LogicalOperators[jProperty.Name]
+                .MakeGenericType(targetType)
+                .GetMethod("CreateFrom")
+                .Invoke(null, new[] { (JObject)jProperty.Value });
         }
     }
 
@@ -51,12 +62,13 @@ namespace Descriptson.RepresentationTree.Logic
             : this((IEnumerable<IDescriptsonTest<TTarget>>)subExpressions)
         { }
 
-        public static DescriptsonLogicalElement<TTarget> Make(string name, JObject jObject)
-        {
-            return (DescriptsonLogicalElement<TTarget>)Make(name, typeof(TTarget), jObject);
-        }
+        /*public static DescriptsonLogicalElement<TTarget> CreateFrom(JObject jObject)
+        { }*/
 
-        public abstract DescriptsonLogicalElement<TTarget> CreateFrom(JObject jObject);
+        public static DescriptsonLogicalElement<TTarget> Make(JProperty jProperty)
+        {
+            return (DescriptsonLogicalElement<TTarget>)Make(typeof(TTarget), jProperty);
+        }
 
         public abstract bool Test(TTarget target);
 
@@ -66,13 +78,21 @@ namespace Descriptson.RepresentationTree.Logic
             {
                 if (IsKnownOperator(jProperty.Name))
                 {
-                    if (jProperty.Value.Type != JTokenType.Object)
-                        throw new InvalidOperationException("Operator needs an array!");
-
-                    yield return Make(jProperty.Name, (JObject)jProperty.Value);
+                    yield return Make(jProperty);
                 }
                 else
                 {
+                    if (jProperty.Value.Type == JTokenType.Array)
+                        throw new InvalidOperationException("Logical expressions can't contain assignments!");
+
+                    if (jProperty.Value.Type == JTokenType.Object)
+                    {
+                        //sub-property select
+                        continue;
+                    }
+
+                    //property test
+
                     // resolve property testing / indexing []
                     // if (propertyNames.Contains(jProperty.Name))
                 }

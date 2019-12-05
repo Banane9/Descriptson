@@ -15,7 +15,7 @@ namespace Descriptson.RepresentationTree.Logic
             : base(subExpressions)
         { }
 
-        public override DescriptsonLogicalElement<TTarget> CreateFrom(JObject jObject)
+        public static DescriptsonLogicalElement<TTarget> CreateFrom(JObject jObject)
         {
             return new DescriptsonLogicalXOr<TTarget>(GetSubExpressions(jObject));
         }

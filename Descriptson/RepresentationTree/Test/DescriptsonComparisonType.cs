@@ -3,10 +3,10 @@ using System.Collections.Generic;
 
 namespace Descriptson.RepresentationTree.Test
 {
-    public enum DescriptsonComparisonType
+    public enum DescriptsonComparisonType : ushort
     {
-        Equal,
-        UpTo,
-        AtLeast
+        Equal = '=',
+        UpTo = '<',
+        AtLeast = '>'
     }
 }

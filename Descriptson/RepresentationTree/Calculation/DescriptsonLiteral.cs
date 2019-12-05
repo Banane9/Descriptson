@@ -7,6 +7,12 @@ namespace Descriptson.RepresentationTree.Calculation
     {
         public TResult Value { get; }
 
+        public DescriptsonLiteral(TResult value)
+            : base()
+        {
+            Value = value;
+        }
+
         public TResult Calculate(TTarget target)
         {
             return Value;

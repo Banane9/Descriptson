@@ -11,7 +11,7 @@ namespace Descriptson.RepresentationTree.Logic
             : base(subExpression)
         { }
 
-        public override DescriptsonLogicalElement<TTarget> CreateFrom(JObject jObject)
+        public static DescriptsonLogicalElement<TTarget> CreateFrom(JObject jObject)
         {
             //if (jObject.Children().Count() > 1)
             //    throw new InvalidOperationException("A not-operator can only have one sub-expression!");

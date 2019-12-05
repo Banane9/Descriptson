@@ -28,9 +28,9 @@ namespace Descriptson
 
         private static readonly ParameterExpression targetParam = Expression.Parameter(typeof(TTarget));
 
-        public static Func<TTarget, object> ParseAccessPath(string path)
+        public static Expression<Func<TTarget, object>> ParseAccessPath(string path)
         {
-            return Expression.Lambda<Func<TTarget, object>>(parseAccessPath(path), targetParam).Compile();
+            return Expression.Lambda<Func<TTarget, object>>(parseAccessPath(path), targetParam);
         }
 
         private static int indexOfMatchingChar(string str, char open, char close, int startIndex)
@@ -75,7 +75,7 @@ namespace Descriptson
             else if (path[nextIndex] == indexerStart)
             {
                 // find closing bracket of this particular indexer
-                var indexerEndIndex = indexOfMatchingChar(path, indexerStart, indexerEnd, currentIndex);
+                var indexerEndIndex = indexOfMatchingChar(path, indexerStart, indexerEnd, nextIndex + 1);
 
                 // split this particular indexer into sub-paths and parse them
                 var indexParameterStr = path.Substring(currentIndex, indexerEndIndex - currentIndex);

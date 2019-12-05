@@ -4,7 +4,7 @@ using System.Reflection;
 
 namespace Descriptson.RepresentationTree.Calculation
 {
-    public class DescriptionPropertyAccess<TTarget, TResult> : IDescriptsonCalculation<TTarget, TResult>
+    public class DescriptsonPropertyAccess<TTarget, TResult> : IDescriptsonCalculation<TTarget, TResult>
     {
         public PropertyInfo Property { get; }
 
