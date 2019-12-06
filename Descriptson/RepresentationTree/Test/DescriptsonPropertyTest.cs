@@ -70,7 +70,7 @@ namespace Descriptson.RepresentationTree.Test
             Value = value ?? throw new ArgumentNullException(nameof(value), "Literal value to be compared to must not be null!");
         }
 
-        public DescriptsonPropertyTest<TTarget> CreateFrom(JProperty jProperty)
+        public static DescriptsonPropertyTest<TTarget> CreateFrom(JProperty jProperty)
         {
             var path = jProperty.Name.Substring(0, jProperty.Name.Length - 1);
             var getValue = DescriptsonPropertyManager<TTarget>.ParseAccessPath(path);
@@ -80,7 +80,7 @@ namespace Descriptson.RepresentationTree.Test
             return new DescriptsonPropertyTest<TTarget>(getValue, comparisonType, value);
         }
 
-        public DescriptsonPropertyTest<TTarget> Make(JProperty jProperty)
+        public static DescriptsonPropertyTest<TTarget> Make(JProperty jProperty)
         {
             return (DescriptsonPropertyTest<TTarget>)Make(typeof(TTarget), jProperty);
         }

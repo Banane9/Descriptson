@@ -87,12 +87,18 @@ namespace Descriptson.RepresentationTree.Logic
 
                     if (jProperty.Value.Type == JTokenType.Object)
                     {
-                        //sub-property select
+                        var getValue = DescriptsonPropertyManager<TTarget>.ParseAccessPath(jProperty.Name);
+
+                        yield return (IDescriptsonTest<TTarget>)Activator.CreateInstance(
+                            typeof(DescriptsonSubPropertySelect<,>)
+                                .MakeGenericType(typeof(TTarget),
+                            getValue.Body.Type),
+                            (JObject)jProperty.Value);
                         continue;
                     }
 
                     //property test
-
+                    yield return DescriptsonPropertyTest<TTarget>.CreateFrom(jProperty);
                     // resolve property testing / indexing []
                     // if (propertyNames.Contains(jProperty.Name))
                 }
