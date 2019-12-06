@@ -21,16 +21,24 @@ namespace Descriptson
 
         private static readonly char[] memberAccess = new[] { property, indexerStart };
 
-        private static readonly Dictionary<string, PropertyInfo> setProperties =
-            typeof(TTarget).GetProperties()
-            .Where(p => p.GetCustomAttribute<DescriptsonSetAttribute>() != null && p.Name != indexPropertyName)
-            .ToDictionary(p => p.Name, StringComparer.OrdinalIgnoreCase);
-
         private static readonly ParameterExpression targetParam = Expression.Parameter(typeof(TTarget));
 
         public static Expression<Func<TTarget, object>> ParseAccessPath(string path)
         {
             return Expression.Lambda<Func<TTarget, object>>(parseAccessPath(path), targetParam);
+        }
+
+        public static Expression<Action<TTarget, object>> ParseWritePath(string path)
+        {
+            var valueParam = Expression.Parameter(typeof(object));
+            var readAccess = (MemberExpression)parseAccessPath(path);
+
+            var targetPropertyType = ((PropertyInfo)readAccess.Member).PropertyType;
+            if (targetPropertyType.GetGenericTypeDefinition() != typeof(DescriptsonCalculated<,>))
+                throw new InvalidOperationException(
+                    $"Property [{readAccess.Member.Name}] that gets assigned to needs to be of Type DescriptsonCalculated<,>!");
+
+            return Expression.Lambda<Action<TTarget, object>>(Expression.Assign(readAccess, Expression.Convert(valueParam, targetPropertyType)), targetParam, valueParam);
         }
 
         private static int indexOfMatchingChar(string str, char open, char close, int startIndex)
