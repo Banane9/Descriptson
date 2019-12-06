@@ -11,11 +11,11 @@ namespace Descriptson.RepresentationTree.Calculation
         private readonly Func<TTarget, object> getValue;
         public Expression AccessExpression { get; }
 
-        public DescriptsonPropertyAccess(Expression<Func<TTarget, object>> accessExpression)
+        public DescriptsonPropertyAccess(LambdaExpression accessExpression)
             : base()
         {
             AccessExpression = accessExpression.Body;
-            getValue = accessExpression.Compile();
+            getValue = (Func<TTarget, object>)accessExpression.Compile();
         }
 
         public static DescriptsonPropertyAccess<TTarget, TResult> CreateFrom(IEnumerable<JToken> jTokens)

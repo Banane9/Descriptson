@@ -15,10 +15,10 @@ namespace Descriptson.RepresentationTree.Test
         public DescriptsonComparisonType ComparisonType { get; }
         public Type ValueType { get; }
 
-        public DescriptsonCalculatedPropertyTest(Expression<Func<TTarget, object>> getValue, DescriptsonComparisonType comparisonType, IDescriptsonCalculation<TTarget, object> calculation)
+        public DescriptsonCalculatedPropertyTest(LambdaExpression getValue, DescriptsonComparisonType comparisonType, IDescriptsonCalculation<TTarget, object> calculation)
         {
             AccessExpression = getValue.Body;
-            this.getValue = getValue.Compile();
+            this.getValue = (Func<TTarget, object>)getValue.Compile();
             ComparisonType = comparisonType;
             Calculation = calculation;
         }

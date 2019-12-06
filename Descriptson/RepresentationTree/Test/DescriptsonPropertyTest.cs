@@ -61,10 +61,11 @@ namespace Descriptson.RepresentationTree.Test
         public object Value { get; }
         public Type ValueType { get; }
 
-        public DescriptsonPropertyTest(Expression<Func<TTarget, object>> getValue, DescriptsonComparisonType comparisonType, object value)
+        public DescriptsonPropertyTest(LambdaExpression getValue, DescriptsonComparisonType comparisonType, object value)
         {
             AccessExpression = getValue.Body;
-            this.getValue = getValue.Compile();
+            var compiled = getValue.Compile();
+            this.getValue = target => compiled.DynamicInvoke(target);
             ComparisonType = comparisonType;
             ValueType = AccessExpression.Type;
             Value = value ?? throw new ArgumentNullException(nameof(value), "Literal value to be compared to must not be null!");
@@ -75,7 +76,7 @@ namespace Descriptson.RepresentationTree.Test
             var path = jProperty.Name.Substring(0, jProperty.Name.Length - 1);
             var getValue = DescriptsonPropertyManager<TTarget>.ParseAccessPath(path);
             var comparisonType = (DescriptsonComparisonType)jProperty.Name[jProperty.Name.Length - 1];
-            var value = typeof(JToken).GetMethod("Value").MakeGenericMethod(getValue.Body.Type).Invoke(jProperty.Value, null);
+            var value = jProperty.Value.ToObject(getValue.Body.Type);
 
             return new DescriptsonPropertyTest<TTarget>(getValue, comparisonType, value);
         }

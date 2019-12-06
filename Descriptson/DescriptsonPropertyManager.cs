@@ -23,9 +23,10 @@ namespace Descriptson
 
         private static readonly ParameterExpression targetParam = Expression.Parameter(typeof(TTarget));
 
-        public static Expression<Func<TTarget, object>> ParseAccessPath(string path)
+        public static LambdaExpression ParseAccessPath(string path)
         {
-            return Expression.Lambda<Func<TTarget, object>>(parseAccessPath(path), targetParam);
+            var readAccess = (MemberExpression)parseAccessPath(path);
+            return Expression.Lambda(parseAccessPath(path), targetParam);
         }
 
         public static Expression<Action<TTarget, object>> ParseWritePath(string path)
@@ -67,7 +68,7 @@ namespace Descriptson
 
             // if no more accessors found, only the tail remains
             if (nextIndex < 0)
-                nextIndex = path.Length - 1;
+                nextIndex = path.Length;
 
             // member access before nextIndex
             if (nextIndex > currentIndex)
