@@ -1,7 +1,7 @@
 ﻿using System;
 using System.Linq;
 using System.Collections.Generic;
-using Newtonsoft.Json.Linq;
+using Newtonsoft.Json;
 
 namespace Descriptson.RepresentationTree.Logic
 {
@@ -11,12 +11,12 @@ namespace Descriptson.RepresentationTree.Logic
             : base(subExpression)
         { }
 
-        public static DescriptsonLogicalElement<TTarget> CreateFrom(JObject jObject)
+        public static DescriptsonLogicalElement<TTarget> CreateFrom(JsonReader reader)
         {
             //if (jObject.Children().Count() > 1)
             //    throw new InvalidOperationException("A not-operator can only have one sub-expression!");
 
-            return new DescriptsonLogicalNot<TTarget>(GetSubExpressions(jObject).Single());
+            return new DescriptsonLogicalNot<TTarget>(GetSubExpressions(reader).Single());
         }
 
         public override bool Test(TTarget target)

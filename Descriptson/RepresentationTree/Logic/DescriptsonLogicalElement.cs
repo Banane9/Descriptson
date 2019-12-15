@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.Linq;
 using Descriptson.RepresentationTree.Test;
+using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
 
 namespace Descriptson.RepresentationTree.Logic
@@ -65,42 +66,56 @@ namespace Descriptson.RepresentationTree.Logic
         /*public static DescriptsonLogicalElement<TTarget> CreateFrom(JObject jObject)
         { }*/
 
-        public static DescriptsonLogicalElement<TTarget> Make(JProperty jProperty)
+        public static DescriptsonLogicalElement<TTarget> Make(JsonReader reader)
         {
-            return (DescriptsonLogicalElement<TTarget>)Make(typeof(TTarget), jProperty);
+            return (DescriptsonLogicalElement<TTarget>)Make(typeof(TTarget), reader);
         }
 
         public abstract bool Test(TTarget target);
 
-        protected static IEnumerable<IDescriptsonTest<TTarget>> GetSubExpressions(JObject jObject)
+        protected static IEnumerable<IDescriptsonTest<TTarget>> GetSubExpressions(JsonReader reader)
         {
-            foreach (var jProperty in jObject.Children().Cast<JProperty>())
+            while (reader.Read() && (reader.TokenType != JsonToken.EndObject))
             {
-                if (IsKnownOperator(jProperty.Name))
+                if (reader.TokenType != JsonToken.PropertyName)
+                    throw new InvalidOperationException("Unknown JObject conversion state");
+
+                string propertyName = (string)reader.Value;
+
+                if (IsKnownOperator(propertyName))
                 {
-                    yield return Make(jProperty);
+                    yield return Make(reader);
                 }
                 else
                 {
-                    if (jProperty.Value.Type == JTokenType.Array)
-                        throw new InvalidOperationException("Logical expressions can't contain assignments!");
+                    reader.Read();
 
-                    if (jProperty.Value.Type == JTokenType.Object)
+                    switch (reader.TokenType)
                     {
-                        var getValue = DescriptsonPropertyManager<TTarget>.ParseAccessPath(jProperty.Name);
+                        case JsonToken.StartArray:
+                            if (!DescriptsonPropertyTest.EndsWithTestIndicator(propertyName))
+                                throw new InvalidOperationException("Logical expressions can't contain assignments!");
 
-                        yield return (IDescriptsonTest<TTarget>)Activator.CreateInstance(
-                            typeof(DescriptsonSubPropertySelect<,>)
-                                .MakeGenericType(typeof(TTarget),
-                            getValue.Body.Type),
-                            (JObject)jProperty.Value);
-                        continue;
+                            //calculated property test
+                            yield return DescriptsonCalculatedPropertyTest<TTarget>.CreateFrom(propertyName, reader);
+                            break;
+
+                        case JsonToken.StartObject:
+                            if (DescriptsonPropertyTest.EndsWithTestIndicator(propertyName))
+                                yield return DescriptsonPropertyTest<TTarget>.CreateFrom(propertyName, reader);
+
+                            var getValue = DescriptsonPropertyManager<TTarget>.ParseAccessPath(propertyName);
+
+                            yield return (IDescriptsonTest<TTarget>)Activator.CreateInstance(
+                                typeof(DescriptsonSubPropertySelect<,>)
+                                    .MakeGenericType(typeof(TTarget), getValue.Body.Type),
+                                getValue,
+                                reader);
+                            break;
+
+                        default:
+                            throw new InvalidOperationException();
                     }
-
-                    //property test
-                    yield return DescriptsonPropertyTest<TTarget>.CreateFrom(jProperty);
-                    // resolve property testing / indexing []
-                    // if (propertyNames.Contains(jProperty.Name))
                 }
             }
         }

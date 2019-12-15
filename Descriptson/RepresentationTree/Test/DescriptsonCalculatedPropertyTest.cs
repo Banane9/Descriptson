@@ -23,7 +23,7 @@ namespace Descriptson.RepresentationTree.Test
             Calculation = calculation;
         }
 
-        public DescriptsonCalculatedPropertyTest<TTarget> CreateFrom(JProperty jProperty)
+        public static DescriptsonCalculatedPropertyTest<TTarget> CreateFrom(JProperty jProperty)
         {
             var path = jProperty.Name.Substring(0, jProperty.Name.Length - 1);
             var getValue = DescriptsonPropertyManager<TTarget>.ParseAccessPath(path);

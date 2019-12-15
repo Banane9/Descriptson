@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Runtime.Serialization;
+using Descriptson.JsonConverters;
 using Descriptson.RepresentationTree;
 using Descriptson.RepresentationTree.Calculation;
 using Descriptson.RepresentationTree.Logic;
@@ -14,11 +15,10 @@ namespace Descriptson
     [JsonObject(MemberSerialization = MemberSerialization.OptIn)]
     public abstract class DescriptsonObjectBlueprint<TObject> where TObject : DescriptsonObject<TObject>, new()
     {
-        private DescriptsonCalculatedProperty<TObject>[] calculations;
+        [JsonProperty("Calculate"), JsonConverter(typeof(DescriptsonCalculationConverter))]
+        private DescriptsonCalculatedProperty<TObject>[] calculations = new DescriptsonCalculatedProperty<TObject>[0];
 
-        [JsonExtensionData(WriteData = false)]
-        private Dictionary<string, JToken> contentData = new Dictionary<string, JToken>(StringComparer.OrdinalIgnoreCase);
-
+        [JsonProperty("Validate"), JsonConverter(typeof(DescriptsonValidationConverter))]
         public IDescriptsonTest<TObject> ValidationTest { get; private set; }
 
         public bool CreateObjectFromBlueprint(Action<TObject> configure, out TObject obj)

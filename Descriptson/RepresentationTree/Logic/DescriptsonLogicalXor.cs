@@ -1,7 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
-using Newtonsoft.Json.Linq;
+using Newtonsoft.Json;
 
 namespace Descriptson.RepresentationTree.Logic
 {
@@ -15,9 +15,9 @@ namespace Descriptson.RepresentationTree.Logic
             : base(subExpressions)
         { }
 
-        public static DescriptsonLogicalElement<TTarget> CreateFrom(JObject jObject)
+        public static DescriptsonLogicalElement<TTarget> CreateFrom(JsonReader reader)
         {
-            return new DescriptsonLogicalXOr<TTarget>(GetSubExpressions(jObject));
+            return new DescriptsonLogicalXOr<TTarget>(GetSubExpressions(reader));
         }
 
         public override bool Test(TTarget target)
